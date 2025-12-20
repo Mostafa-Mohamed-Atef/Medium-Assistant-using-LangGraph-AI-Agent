@@ -1,258 +1,134 @@
-Great direction — building this **around Twitter/X** (or similar platforms) is actually *perfect* for showing what an **AI agent** is. I’ll explain:
+Medium Draft Improvement AI Agent (LangGraph)
 
-1. **How to build it using Twitter/X**
-2. **Why Twitter is optional (and alternatives)**
-3. **A clean, realistic system architecture**
-4. **What I recommend for an academic project**
+An AI-powered editorial assistant built with LangGraph that analyzes, evaluates, revises, and explains improvements to Medium article drafts.
+The project demonstrates a stateful, multi-step AI agent workflow with conditional logic and LLM integration.
 
-I’ll keep it practical, not hand-wavy.
+🚀 Project Overview
 
----
+This project implements an AI agent workflow using LangGraph, a framework for building stateful, multi-node applications on top of large language models (LLMs).
 
-## 1️⃣ Building the AI Detection Agent on Twitter/X
+The agent simulates the behavior of a professional Medium editor by:
 
-### What “on Twitter” really means
+Analyzing a draft article for writing issues
 
-You **do NOT** need to scrape Twitter illegally or build a browser extension.
+Evaluating its quality for a target audience
 
-You just need:
+Conditionally revising the article if needed
 
-* Tweets as **input text**
-* Metadata (optional)
-* Your agent runs **outside Twitter**
+Explaining the editorial decisions made by the agent
 
----
+A Streamlit web application is included to provide an interactive UI and visualize the LangGraph workflow.
 
-### Option A: Twitter/X API (Official, but limited)
+🧠 Agent Workflow
 
-**Flow**
+The agent operates as a directed graph with the following nodes:
 
-1. Fetch tweets via API (user timeline, search, or replies)
-2. Pass tweet text into your LangGraph agent
-3. Output AI-likelihood + explanation
+🔹 Nodes
+Node	Description
+analyze	Identifies writing issues without rewriting
+evaluate	Assigns a quality score (0–1)
+revise	Improves clarity and flow if score is low
+explain	Explains decisions and changes
+🔀 Control Flow
 
-**Pros**
+If quality_score < 0.75 → article is revised
 
-* Real-world feel
-* Strong demo value
+Otherwise → article is approved and explained
 
-**Cons**
+This introduces conditional branching, a key LangGraph feature.
 
-* API access can be annoying/paid
+🗂 State Definition
 
----
+The agent uses a shared, evolving state defined with TypedDict:
 
-### Option B (Recommended): “Tweet-like” Input Interface
-
-This is what many top students do.
-
-**How**
-
-* User pastes tweet text
-* Optional fields: likes, retweets, account age
-* Agent analyzes it as if it came from Twitter
-
-**Why this is smart**
-
-* No API issues
-* Still realistic
-* Easy to justify academically
-
----
-
-## 2️⃣ LangGraph Agent Architecture (Twitter Version)
-
-### Shared State
-
-```python
-class DetectionState(TypedDict):
-    tweet_text: str
-    metadata: dict
-    linguistic_signals: dict
-    llm_assessment: str
-    confidence_score: float
-    decision: str
+class MediumState(TypedDict):
+    draft_text: str
+    audience: str
+    issues_found: List[str]
+    quality_score: float
+    final_text: str
     explanation: str
-```
 
----
 
-### Graph Nodes
+Each node reads from and updates this shared state.
 
-#### 🟦 Node 1: Tweet Preprocessing
+🤖 LLM Integration
 
-* Remove URLs, emojis
-* Normalize hashtags
-* Update state with cleaned text
+Model provider: Groq
 
----
+Model used: LLaMA 3.1 (8B Instant)
 
-#### 🟦 Node 2: Linguistic Pattern Analysis
+LLM calls occur in:
 
-(No LLM)
+Analysis
 
-* Sentence uniformity
-* Repetition
-* Over-polished grammar
+Evaluation
 
-Updates `linguistic_signals`
+Revision
 
----
+Environment variables are managed using python-dotenv.
 
-#### 🟦 Node 3: LLM Reasoning Node ✅
+🖥 Streamlit Application
 
-Prompt example:
+The Streamlit app allows users to:
 
-> “Given these linguistic features and the tweet text, estimate likelihood it was AI-generated and explain why.”
+Paste a Medium article draft
 
-Updates:
+Select a target audience
 
-* `llm_assessment`
-* `confidence_score`
+Run the LangGraph agent
 
----
+View:
 
-#### 🟦 Node 4: Conditional Decision Node
+Detected issues
 
-```text
-If confidence < 0.6 → run deeper analysis
-Else → finalize
-```
+Quality score
 
-This is **key agent behavior**.
+Revised article
 
----
+Explanation of changes
 
-#### 🟦 Node 5: Explanation Generator
+See a visual representation of the LangGraph workflow
 
-* Converts signals into human-readable explanation
+📊 Graph Visualization
 
----
+The LangGraph structure is exported as an image (graph_visual.png) using Mermaid syntax.
+This helps illustrate node transitions and conditional paths.
 
-## 3️⃣ Why This Is an AGENT (Twitter Example)
+📁 Project Structure
+Medium-Assistant-using-LangGraph-AI-Agent/
+│
+├── main.py               # LangGraph agent definition & execution
+├── app.py                # Streamlit UI
+├── graph_visual.png      # LangGraph workflow visualization
+├── .env                  # API keys (not committed)
+├── README.md             # Project documentation
+└── requirements.txt      # Python dependencies
 
-**Non-agent version**
+⚙️ Installation & Setup
+1️⃣ Create virtual environment
+python -m venv myenv
+myenv\Scripts\activate
 
-```text
-Tweet → LLM → “AI-generated”
-```
+2️⃣ Install dependencies
+pip install -r requirements.txt
 
-**Agent version**
+3️⃣ Environment variables
 
-```text
-Tweet →
-  Feature Analysis →
-    LLM Reasoning →
-      Confidence Check →
-        Explanation →
-          Final Decision
-```
+Create a .env file:
 
-You can literally show this diagram in your report.
+GROQ_API_KEY=your_api_key_here
 
----
+▶️ Running the Project
+Run the LangGraph agent (CLI)
+python main.py
 
-## 4️⃣ Other Platforms (Sometimes Better Than Twitter)
 
-If Twitter feels messy, here are **excellent alternatives**:
+This will:
 
----
+Generate the graph visualization
 
-### 🔹 Reddit Comment Detection
+Execute the agent on a sample draft
 
-**Why it’s great**
-
-* Longer text
-* Clear AI vs human differences
-* Public data
-
-**Use cases**
-
-* r/AskReddit
-* r/ChatGPT
-
----
-
-### 🔹 Student Essay Submissions
-
-**Perfect for academia**
-
-* Clear evaluation criteria
-* Explainability matters
-
----
-
-### 🔹 News Headlines & Comments
-
-**Why**
-
-* Compare human-written vs AI headlines
-* Great for hallucination analysis
-
----
-
-### 🔹 Email / Customer Support Messages
-
-**Very realistic**
-
-* AI-written emails are common
-* Easy to justify
-
----
-
-### 🔹 YouTube Comments
-
-**Pros**
-
-* Short text
-* High AI spam presence
-
----
-
-## 5️⃣ My Honest Recommendation (Best Choice)
-
-### 🥇 Best Overall (No API Pain)
-
-> **“AI-Generated Social Media Text Detection Agent”**
-
-You can say:
-
-> “We designed an AI agent that detects AI-generated social media content such as tweets, Reddit posts, or comments.”
-
-That gives you **flexibility + realism**.
-
----
-
-## 6️⃣ What Your Final Demo Can Look Like
-
-**Input**
-
-```text
-Tweet:
-"Unlock your potential with this simple mindset shift that changes everything."
-```
-
-**Output**
-
-```text
-Decision: Likely AI-generated (78%)
-
-Reasons:
-- Generic motivational phrasing
-- Lack of personal details
-- Balanced sentence structure
-- Overuse of abstract language
-```
-
----
-
-## 7️⃣ Next Steps (I Can Help You With)
-
-If you want, I can:
-
-1. Design the **LangGraph code skeleton**
-2. Write **LLM prompts**
-3. Create a **diagram for your report**
-4. Help you explain **why this is an agent, not a classifier**
-
-Just tell me what you want next 👌
+Run the Streamlit app
+streamlit run app.py
