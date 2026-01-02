@@ -1,15 +1,3 @@
-"""
-Medium Draft Improvement AI Agent
---------------------------------
-This agent analyzes a Medium article draft, evaluates its quality,
-decides whether revision is needed, improves it if necessary,
-and explains the editorial decisions.
-
-Built with:
-- LangGraph
-- Gemini (Google Generative AI)
-"""
-
 from typing import TypedDict, List
 from langgraph.graph import StateGraph, END
 from langchain_groq import ChatGroq
@@ -31,7 +19,7 @@ class MediumState(TypedDict):
 
 
 # =========================================================
-# 2. LLM SETUP (GEMINI)
+# 2. LLM SETUP
 # =========================================================
 load_dotenv()
 
@@ -108,7 +96,7 @@ def decision_node(state: MediumState) -> str:
     """
     Decide whether the article should be revised.
     """
-    if state["quality_score"] < 0.75:
+    if state["quality_score"] < 0.80:
         return "revise"
     return "approve"
 
@@ -181,10 +169,6 @@ builder.add_edge("explain", END)
 
 agent = builder.compile()
 
-
-# =========================================================
-# 5. OPTIONAL: GRAPH VISUALIZATION (FOR REPORTS)
-# =========================================================
 
 # =========================================================
 # 5. EXECUTION & VISUALIZATION
